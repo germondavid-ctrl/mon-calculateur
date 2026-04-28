@@ -3,134 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Terminal Bancaire - David Germon</title>
+    <title>Simulateur Masloulim - David Germon</title>
     <style>
-        :root { --primary: #1a365d; --secondary: #2b6cb0; --accent: #38a169; --danger: #e53e3e; --bg: #f7fafc; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: #2d3748; line-height: 1.5; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 40px; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 5px solid var(--primary); padding-bottom: 20px; margin-bottom: 30px; }
-        h1 { margin: 0; font-size: 28px; color: var(--primary); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .card { background: #fff; border: 1px solid #e2e8f0; padding: 25px; border-radius: 20px; position: relative; }
-        .card-title { font-weight: bold; font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
-        input, select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; margin-bottom: 15px; transition: 0.3s; box-sizing: border-box;}
-        input:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 0 3px rgba(66,153,225,0.2); }
-        .result-val { font-size: 24px; font-weight: 800; color: var(--secondary); }
-        .fee-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; }
-        .negotiation-box { background: #f0fff4; border: 2px dashed var(--accent); padding: 20px; border-radius: 15px; margin-top: 30px; }
-        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        :root { --primary: #1a365d; --secondary: #2b6cb0; --accent: #38a169; --bg: #f7fafc; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: #2d3748; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--primary); padding-bottom: 15px; margin-bottom: 25px; }
+        .card { border: 1px solid #e2e8f0; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; }
+        .result-box { background: #ebf8ff; padding: 20px; border-radius: 15px; text-align: center; }
+        .price-tag { font-size: 28px; font-weight: bold; color: #e53e3e; }
+        .formula-info { background: #fffaf0; border-right: 5px solid #ed8936; padding: 15px; margin-top: 15px; border-radius: 8px; }
+        .rtl .formula-info { border-right: 5px solid #ed8936; border-left: none; }
+        .ltr .formula-info { border-left: 5px solid #ed8936; border-right: none; }
+        button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        td { padding: 12px; border-bottom: 1px solid #edf2f7; }
         .rtl { direction: rtl; text-align: right; }
         .ltr { direction: ltr; text-align: left; }
-        table { width: 100%; margin-top: 15px; border-collapse: collapse; }
-        td { padding: 12px; border-bottom: 1px solid #edf2f7; }
-        .warning-madad { color: var(--danger); font-size: 13px; margin-top: 10px; font-style: italic; }
     </style>
 </head>
 <body class="rtl" dir="rtl">
 
 <div class="container" id="app">
     <div class="header">
-        <h1 id="txtTitle">Terminal Bancaire Israël 2026</h1>
+        <h1 id="txtTitle">Simulateur de Formules (Masloulim)</h1>
         <button onclick="toggleLang()" id="btnLang">Français</button>
     </div>
 
-    <div class="grid">
-        <div class="card">
-            <div class="card-title">💰 <span id="tPurchase">Achat & Frais Annexes</span></div>
-            <label id="lPrice">Prix de l'appartement (₪)</label>
-            <input type="number" id="price" value="2500000" oninput="calculate()">
-            
-            <div class="fee-item">
-                <span id="lTax">Taxe d'Achat (Est.)</span>
-                <span id="resTax" class="bold">0 ₪</span>
-            </div>
-            <div class="fee-item">
-                <span id="lAdv">Avocat (0.5% + TVA)</span>
-                <span id="resAdv">0 ₪</span>
-            </div>
-            <div class="fee-item">
-                <span id="lAg">Agent Immobilier (2% + TVA)</span>
-                <span id="resAg">0 ₪</span>
-            </div>
-            <div style="margin-top: 15px; font-weight: bold; color: var(--danger);">
-                <span id="lTotalCash">Total Cash Nécessaire :</span>
-                <span id="resTotalCash">0 ₪</span>
-            </div>
-        </div>
+    <div class="card">
+        <label id="lblLoan">Montant du prêt souhaité (₪)</label>
+        <input type="number" id="loanAmount" value="1000000" oninput="calculate()">
+        
+        <label id="lblYears">Durée du prêt (Années)</label>
+        <input type="number" id="years" value="20" oninput="calculate()">
 
-        <div class="card">
-            <div class="card-title">🏠 <span id="tMash">Simulation Mashkanta</span></div>
-            <label id="lDown">Apport Personnel (₪)</label>
-            <input type="number" id="down" value="800000" oninput="calculate()">
-            <label id="lLoan">Prêt net :</label>
-            <div class="result-val" id="resLoan">0 ₪</div>
-            <hr>
-            <label id="lMonthly">Mensualité Estimée :</label>
-            <div class="result-val" style="color: var(--danger);" id="resMonthly">0 ₪</div>
-            <div class="warning-madad" id="lMadadWarn">⚠️ Attention : Si l'inflation monte de 3%, votre dette globale augmente.</div>
-        </div>
+        <label id="lblFormula">Choisir la formule de crédit (Masloul) :</label>
+        <select id="formulaSelect" onchange="calculate()">
+            <option value="prime">Taux Prime (Variable - non indexé)</option>
+            <option value="kalatz">Taux Fixe (Non indexé - Kalatz)</option>
+            <option value="variable5">Variable tous les 5 ans (Indexé Madad)</option>
+            <option value="fixeTzamoud">Taux Fixe (Indexé Madad)</option>
+        </select>
     </div>
 
-    <div class="grid" style="margin-top: 30px;">
-        <div class="card">
-            <div class="card-title">🏦 <span id="tBank">Comparatif Banques</span></div>
-            <select id="bankSelect" onchange="calculate()">
-                <option value="mizrahi">Mizrahi-Tefahot (Expert Mashkanta)</option>
-                <option value="leumi">Bank Leumi (Meilleure App)</option>
-                <option value="discount">Bank Discount (Meilleur Conso)</option>
-                <option value="hapoalim">Bank Hapoalim (Solide)</option>
-            </select>
-            <table id="bankTable"></table>
-        </div>
-
-        <div class="card">
-            <div class="card-title">🚗 <span id="tConso">Besoin d'un crédit Conso/Voiture ?</span></div>
-            <label id="lConsoAmt">Montant (₪)</label>
-            <input type="number" id="consoAmt" value="0" oninput="calculate()">
-            <label id="lConsoRes">Mensualité additionnelle :</label>
-            <div class="result-val" style="color: var(--accent);" id="resConso">0 ₪</div>
-        </div>
+    <div class="result-box">
+        <span id="lblRes">Mensualité estimée :</span><br>
+        <div class="price-tag" id="monthlyRes">0 ₪</div>
     </div>
 
-    <div class="negotiation-box">
-        <div class="card-title">📝 <span id="tNego">Votre Argumentaire de Négociation</span></div>
-        <p id="negoText" style="font-family: monospace; white-space: pre-wrap;"></p>
+    <div id="formulaDetail" class="formula-info">
+        </div>
+
+    <div class="card" style="margin-top:20px;">
+        <h3 id="lblBankComp">Comparatif Taux Bancaires 2026</h3>
+        <table id="bankTable"></table>
     </div>
 </div>
 
 <script>
     let lang = 'he';
-    const banks = {
-        mizrahi: { m: "4.8-5.2%", c: 8.0, o: "9.5%", f: "Négociable", name: "Mizrahi-Tefahot" },
-        leumi: { m: "5.0-5.4%", c: 7.8, o: "10.0%", f: "0.25%", name: "Leumi" },
-        discount: { m: "4.9-5.3%", c: 7.2, o: "8.5%", f: "0.20%", name: "Discount" },
-        hapoalim: { m: "5.1-5.6%", c: 8.2, o: "11.0%", f: "0.25%", name: "Hapoalim" }
+    const formulas = {
+        prime: { rate: 5.5, fr: "Basé sur le taux de la Banque d'Israël. Pas d'amende de remboursement anticipé.", he: "מבוסס על ריבית בנק ישראל. אין עמלת פירעון מוקדם בכלל." },
+        kalatz: { rate: 5.1, fr: "Le taux ne change jamais. Sécurité totale, mensualité garantie.", he: "ריבית קבועה לא צמודה (קל\"צ). ביטחון מלא, ההחזר לא משתנה לעולם." },
+        variable5: { rate: 3.2, fr: "Taux révisé tous les 5 ans. Indexé à l'inflation (Madad).", he: "משתנה כל 5 שנים. צמוד למדד המחירים לצרכן." },
+        fixeTzamoud: { rate: 3.5, fr: "Taux fixe mais capital indexé à l'inflation. Risqué sur le long terme.", he: "ריבית קבועה צמודה למדד. הקרן עלולה לעלות אם המדד עולה." }
+    };
+
+    const bankTaux = {
+        mizrahi: { name: "Mizrahi", r: "4.8% - 5.2%", o: "9.5%" },
+        leumi: { name: "Leumi", r: "5.0% - 5.4%", o: "10.0%" },
+        discount: { name: "Discount", r: "4.9% - 5.3%", o: "8.5%" }
     };
 
     const i18n = {
         fr: {
-            title: "Terminal Bancaire Israël 2026", tPurchase: "Achat & Frais Annexes", lPrice: "Prix de l'appartement (₪)",
-            lTax: "Taxe d'Achat (Est.)", lAdv: "Avocat (0.5% + TVA)", lAg: "Agent (2% + TVA)", lTotalCash: "Total Cash Nécessaire :",
-            tMash: "Simulation Mashkanta", lDown: "Apport Personnel (₪)", lLoan: "Prêt net :", lMonthly: "Mensualité Estimée :",
-            lMadadWarn: "⚠️ Attention : L'inflation peut faire augmenter le capital restant dû.",
-            tBank: "Comparatif Banques", tConso: "Crédit Conso / Voiture", lConsoAmt: "Montant (₪)", lConsoRes: "Mensualité :",
-            tNego: "Argumentaire de Négociation", btn: "עברית",
-            negoTpl: (b, m) => `Bonjour,\nJ'étudie actuellement une offre chez ${b} avec un taux moyen de ${m}.\nJe souhaite obtenir une exonération des frais de dossier et un taux Prime moins 0.5% pour transférer mon compte chez vous.`
+            title: "Simulateur de Formules (Masloulim)", loan: "Montant du prêt souhaité (₪)", years: "Durée du prêt (Années)",
+            formula: "Choisir la formule de crédit (Masloul) :", res: "Mensualité estimée :", 
+            bank: "Comparatif Taux Bancaires 2026", thRate: "Taux Mashkanta", thOver: "Découvert", btn: "עברית"
         },
         he: {
-            title: "טרמינל בנקאות ישראל 2026", tPurchase: "רכישה והוצאות נלוות", lPrice: "מחיר הנכס (₪)",
-            lTax: "מס רכישה (משוער)", lAdv: "עורך דין (0.5% + מע\"מ)", lAg: "מתווך (2% + מע\"מ)", lTotalCash: "סך הכל מזומן נדרש:",
-            tMash: "סימולציית משכנתא", lDown: "הון עצמי (₪)", lLoan: "סכום ההלוואה:", lMonthly: "החזר חודשי משוער:",
-            lMadadWarn: "⚠️ זהירות: הצמדה למדד עלולה להגדיל את יתרת הקרן.",
-            tBank: "השוואת בנקים", tConso: "הלוואה לרכב / כל מטרה", lConsoAmt: "סכום ההלוואה (₪)", lConsoRes: "החזר חודשי:",
-            tNego: "טקסט למשא ומתן מול הבנק", btn: "Français",
-            negoTpl: (b, m) => `שלום,\nאני בוחן כרגע הצעה בבנק ${b} עם ריבית ממוצעת של ${m}.\nאני מצפה לקבל פטור מעמלת פתיחת תיק ושיפור במרווח הפריים כדי לסגור אצלכם.`
+            title: "סימולטור מסלולי משכנתא", loan: "סכום ההלוואה המבוקש (₪)", years: "תקופת ההלוואה (שנים)",
+            formula: "בחר מסלול הלוואה:", res: "החזר חודשי משוער:",
+            bank: "השוואת ריביות בנקים 2026", thRate: "ריבית משכנתא", thOver: "אוברדרפט", btn: "Français"
         }
     };
 
     function toggleLang() {
-        lang = (lang === 'fr' ? 'he' : 'fr');
+        lang = lang === 'fr' ? 'he' : 'fr';
         document.body.className = lang === 'he' ? 'rtl' : 'ltr';
         document.body.dir = lang === 'he' ? 'rtl' : 'ltr';
         updateUI();
@@ -139,70 +100,36 @@
     function updateUI() {
         const t = i18n[lang];
         document.getElementById('txtTitle').innerText = t.title;
-        document.getElementById('tPurchase').innerText = t.tPurchase;
-        document.getElementById('lPrice').innerText = t.lPrice;
-        document.getElementById('lTax').innerText = t.lTax;
-        document.getElementById('lAdv').innerText = t.lAdv;
-        document.getElementById('lAg').innerText = t.lAg;
-        document.getElementById('lTotalCash').innerText = t.lTotalCash;
-        document.getElementById('tMash').innerText = t.tMash;
-        document.getElementById('lDown').innerText = t.lDown;
-        document.getElementById('lLoan').innerText = t.lLoan;
-        document.getElementById('lMonthly').innerText = t.lMonthly;
-        document.getElementById('lMadadWarn').innerText = t.lMadadWarn;
-        document.getElementById('tBank').innerText = t.tBank;
-        document.getElementById('tConso').innerText = t.tConso;
-        document.getElementById('lConsoAmt').innerText = t.lConsoAmt;
-        document.getElementById('lConsoRes').innerText = t.lConsoRes;
-        document.getElementById('tNego').innerText = t.tNego;
+        document.getElementById('lblLoan').innerText = t.loan;
+        document.getElementById('lblYears').innerText = t.years;
+        document.getElementById('lblFormula').innerText = t.formula;
+        document.getElementById('lblRes').innerText = t.res;
+        document.getElementById('lblBankComp').innerText = t.bank;
         document.getElementById('btnLang').innerText = t.btn;
         calculate();
     }
 
     function calculate() {
-        const p = parseFloat(document.getElementById('price').value) || 0;
-        const d = parseFloat(document.getElementById('down').value) || 0;
-        const cAmt = parseFloat(document.getElementById('consoAmt').value) || 0;
-        const bankKey = document.getElementById('bankSelect').value;
-        const b = banks[bankKey];
+        const cap = parseFloat(document.getElementById('loanAmount').value) || 0;
+        const yr = parseFloat(document.getElementById('years').value) || 0;
+        const fKey = document.getElementById('formulaSelect').value;
+        const f = formulas[fKey];
 
-        // 1. Frais Annexes (Simplifié Mas Rekhisha premier achat/résident)
-        const tax = p > 2000000 ? (p - 2000000) * 0.035 : 0; // Estimation simple
-        const adv = p * 0.005 * 1.17;
-        const ag = p * 0.02 * 1.17;
-        const totalFees = tax + adv + ag;
+        if (cap > 0 && yr > 0) {
+            const r = (f.rate / 100) / 12;
+            const n = yr * 12;
+            const m = cap * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
+            document.getElementById('monthlyRes').innerText = Math.round(m).toLocaleString() + " ₪";
+        }
         
-        document.getElementById('resTax').innerText = Math.round(tax).toLocaleString() + " ₪";
-        document.getElementById('resAdv').innerText = Math.round(adv).toLocaleString() + " ₪";
-        document.getElementById('resAg').innerText = Math.round(ag).toLocaleString() + " ₪";
-        document.getElementById('resTotalCash').innerText = Math.round(d + totalFees).toLocaleString() + " ₪";
-
-        // 2. Mashkanta
-        const loan = p - d;
-        document.getElementById('resLoan').innerText = (loan > 0 ? loan : 0).toLocaleString() + " ₪";
-        const monthly = loan > 0 ? pmt(loan, 5.2, 20) : 0;
-        document.getElementById('resMonthly').innerText = Math.round(monthly).toLocaleString() + " ₪";
-
-        // 3. Conso
-        const cMonthly = cAmt > 0 ? pmt(cAmt, b.c, 5) : 0;
-        document.getElementById('resConso').innerText = Math.round(cMonthly).toLocaleString() + " ₪";
-
-        // 4. Bank Table
+        document.getElementById('formulaDetail').innerHTML = `<b>${f.rate}% (Est.)</b><br>${f[lang]}`;
+        
         const t = i18n[lang];
-        document.getElementById('bankTable').innerHTML = `
-            <tr><td>${lang==='fr'?'Taux Mashkanta':'ריבית משכנתא'}</td><td class="result-val">${b.m}</td></tr>
-            <tr><td>${lang==='fr'?'Taux Découvert':'ריבית אוברדרפט'}</td><td style="color:red">${b.o}</td></tr>
-            <tr><td>${lang==='fr'?'Frais Dossier':'עמלת פתיחה'}</td><td>${b.f}</td></tr>
-        `;
-
-        // 5. Nego Text
-        document.getElementById('negoText').innerText = i18n[lang].negoTpl(b.name, b.m);
-    }
-
-    function pmt(cap, rate, yr) {
-        const r = (rate / 100) / 12;
-        const n = yr * 12;
-        return cap * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
+        let bHtml = `<tr><th>Banque</th><th>${t.thRate}</th><th>${t.thOver}</th></tr>`;
+        for (let k in bankTaux) {
+            bHtml += `<tr><td>${bankTaux[k].name}</td><td>${bankTaux[k].r}</td><td>${bankTaux[k].o}</td></tr>`;
+        }
+        document.getElementById('bankTable').innerHTML = bHtml;
     }
 
     updateUI();
